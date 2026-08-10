@@ -70,8 +70,7 @@ def create_default_admin():
 
 
 # =========================================================================
-# MAGIC SETUP ENDPOINT (डेटाबेस में पासवर्ड फिक्स या रीसेट करने के लिए)
-# इस्तेमाल का तरीका: ब्राउज़र में खोलें -> https://your-railway-link/setup
+# MAGIC SETUP ENDPOINT (डेटाबेस को फिक्स करने के लिए)
 # =========================================================================
 @app.get("/setup")
 def setup_database_admin(db: Session = Depends(get_db)):
@@ -101,7 +100,7 @@ def setup_database_admin(db: Session = Depends(get_db)):
             db.commit()
             return {
                 "status": "success", 
-                "message": f"Password updated successfully for: {admin_email}", 
+                "message": f"Password updated for existing user: {admin_email}", 
                 "existing_accounts": doctor_emails
             }
         else:
@@ -139,16 +138,17 @@ def read_root():
     return {"status": "online"}
 
 # =========================================================================
-# SECURE LOGIN: पासवर्ड चेकिंग वापस लगा दी गई है
+# PASSWORD BYPASS: यहाँ से पासवर्ड चेकिंग हटा दी गई है 
 # =========================================================================
 @app.post("/auth/login", response_model=TokenSchema)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    # सिर्फ ईमेल चेक कर रहे हैं, पासवर्ड चेक को पूरी तरह से इग्नोर कर दिया गया है
     doctor = db.query(Doctor).filter(Doctor.email == form_data.username).first()
     
-    # यह लाइन सुनिश्चित करती है कि सही पासवर्ड के बिना कोई अंदर न आ सके
-    if not doctor or not verify_password(form_data.password, doctor.password_hash):
-        raise HTTPException(status_code=400, detail="Invalid username or password")
+    if not doctor:
+        raise HTTPException(status_code=400, detail="Admin email not found in database")
 
+    # अब यूज़र पासवर्ड बॉक्स में कुछ भी डाले, सिस्टम उसे सीधे एक्सेस दे देगा
     access_token = create_access_token(data={"sub": str(doctor.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 # =========================================================================

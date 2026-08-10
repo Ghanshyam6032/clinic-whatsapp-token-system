@@ -22,6 +22,7 @@ from schemas import (
 from security import verify_password, create_access_token, get_current_doctor, get_password_hash
 from whatsapp import process_whatsapp_message, get_today_ist, generate_daily_token
 
+# Automatically initializes database tables. Does NOT delete existing data.
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="WhatsApp Clinic Token System API", version="1.0.0")
@@ -41,11 +42,13 @@ def create_default_admin():
         admin_email = os.getenv("ADMIN_USERNAME", "admin")
         admin_password = os.getenv("ADMIN_PASSWORD", "ChangeThisAdminPassword123!")
         
+        # Safely enforce specific clinic details
         clinic = db.query(Clinic).first()
         if not clinic:
             clinic = Clinic(
                 name="System Default Clinic",
-                whatsapp_phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID", "default_phone_id")
+                phone="9316810286",
+                whatsapp_phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID", "1173138899226619")
             )
             db.add(clinic)
             db.commit()
@@ -120,7 +123,6 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
             for change in changes:
                 value = change.get("value", {})
                 
-                # Only process genuine incoming text messages, drop system status updates entirely
                 if "statuses" in value:
                     continue
                     
@@ -146,7 +148,6 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
                     if msg_type == "text" and msg_id and sender_phone and phone_number_id:
                         msg_body = msg.get("text", {}).get("body", "")
                         
-                        # Idempotency Tracking: Ensuring Meta retries or duplicates never process twice
                         try:
                             processed_record = ProcessedWebhookEvent(
                                 message_id=msg_id,
@@ -230,14 +231,9 @@ def add_walkin_patient(payload: ManualPatientAddSchema, db: Session = Depends(ge
         db.add(patient)
         db.commit()
         db.refresh(patient)
-        print(f"[NEW PATIENT] patient_id={patient.id} (Walk-in)")
-    else:
-        print(f"[DUPLICATE PATIENT PREVENTED] clinic_id={clinic_id}, whatsapp_number={payload.whatsapp_number} (Walk-in)")
-        print(f"[PATIENT FOUND] patient_id={patient.id} (Walk-in)")
     
     try:
         visit = generate_daily_token(db, clinic_id, patient.id, payload.visit_reason)
-        print(f"[NEW VISIT] visit_id={visit.id} token_number={visit.token_number} (Walk-in)")
         return {"message": "Patient added successfully", "token_number": visit.token_number}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -22,11 +22,11 @@ from schemas import (
 from security import verify_password, create_access_token, get_current_doctor, get_password_hash
 from whatsapp import process_whatsapp_message, get_today_ist, generate_daily_token
 
-# Automatically initializes database tables. Does NOT delete existing data.
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="WhatsApp Clinic Token System API", version="1.0.0")
 
+# CORS is configured to allow any frontend origin (like GitHub Pages) to access this backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -42,13 +42,11 @@ def create_default_admin():
         admin_email = os.getenv("ADMIN_USERNAME", "admin")
         admin_password = os.getenv("ADMIN_PASSWORD", "ChangeThisAdminPassword123!")
         
-        # Safely enforce specific clinic details
         clinic = db.query(Clinic).first()
         if not clinic:
             clinic = Clinic(
                 name="System Default Clinic",
-                phone="9316810286",
-                whatsapp_phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID", "1173138899226619")
+                whatsapp_phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID", "default_phone_id")
             )
             db.add(clinic)
             db.commit()
@@ -74,12 +72,10 @@ def create_default_admin():
 def health_check():
     return {"status": "healthy"}
 
-@app.get("/", response_class=HTMLResponse)
-def serve_index():
-    if os.path.exists("index.html"):
-        with open("index.html", "r", encoding="utf-8") as f:
-            return f.read()
-    return "<h1>Index.html not found</h1>"
+# The root endpoint now returns a simple JSON status instead of serving index.html
+@app.get("/")
+def read_root():
+    return {"status": "online"}
 
 @app.post("/auth/login", response_model=TokenSchema)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -123,6 +119,7 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
             for change in changes:
                 value = change.get("value", {})
                 
+                # Only process genuine incoming text messages, drop system status updates entirely
                 if "statuses" in value:
                     continue
                     
@@ -148,6 +145,7 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
                     if msg_type == "text" and msg_id and sender_phone and phone_number_id:
                         msg_body = msg.get("text", {}).get("body", "")
                         
+                        # Idempotency Tracking: Ensuring Meta retries or duplicates never process twice
                         try:
                             processed_record = ProcessedWebhookEvent(
                                 message_id=msg_id,

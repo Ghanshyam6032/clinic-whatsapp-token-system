@@ -68,23 +68,90 @@ def create_default_admin():
     finally:
         db.close()
 
+
+# =========================================================================
+# MAGIC SETUP ENDPOINT (डेटाबेस में पासवर्ड फिक्स या रीसेट करने के लिए)
+# इस्तेमाल का तरीका: ब्राउज़र में खोलें -> https://your-railway-link/setup
+# =========================================================================
+@app.get("/setup")
+def setup_database_admin(db: Session = Depends(get_db)):
+    try:
+        admin_email = os.getenv("ADMIN_USERNAME", "admin")
+        admin_password = os.getenv("ADMIN_PASSWORD", "ChangeThisAdminPassword123!")
+
+        # 1. Ensure Clinic Exists
+        clinic = db.query(Clinic).first()
+        if not clinic:
+            clinic = Clinic(
+                name="System Default Clinic",
+                whatsapp_phone_number_id=os.getenv("WHATSAPP_PHONE_NUMBER_ID", "default_phone_id")
+            )
+            db.add(clinic)
+            db.commit()
+            db.refresh(clinic)
+
+        # 2. Check existing accounts
+        all_doctors = db.query(Doctor).all()
+        doctor_emails = [d.email for d in all_doctors]
+
+        # 3. Force Update or Create Admin
+        admin = db.query(Doctor).filter(Doctor.email == admin_email).first()
+        if admin:
+            admin.password_hash = get_password_hash(admin_password)
+            db.commit()
+            return {
+                "status": "success", 
+                "message": f"Password updated successfully for: {admin_email}", 
+                "existing_accounts": doctor_emails
+            }
+        else:
+            new_admin = Doctor(
+                clinic_id=clinic.id,
+                name="Admin Doctor",
+                email=admin_email,
+                password_hash=get_password_hash(admin_password),
+                is_active=True
+            )
+            db.add(new_admin)
+            db.commit()
+            return {
+                "status": "success", 
+                "message": f"Created NEW admin account: {admin_email}", 
+                "existing_accounts": doctor_emails
+            }
+
+    except Exception as e:
+        db.rollback()
+        return {
+            "status": "error", 
+            "error_message": str(e), 
+            "traceback": traceback.format_exc()
+        }
+# =========================================================================
+
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
-# The root endpoint now returns a simple JSON status instead of serving index.html
 @app.get("/")
 def read_root():
     return {"status": "online"}
 
+# =========================================================================
+# SECURE LOGIN: पासवर्ड चेकिंग वापस लगा दी गई है
+# =========================================================================
 @app.post("/auth/login", response_model=TokenSchema)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     doctor = db.query(Doctor).filter(Doctor.email == form_data.username).first()
+    
+    # यह लाइन सुनिश्चित करती है कि सही पासवर्ड के बिना कोई अंदर न आ सके
     if not doctor or not verify_password(form_data.password, doctor.password_hash):
         raise HTTPException(status_code=400, detail="Invalid username or password")
 
     access_token = create_access_token(data={"sub": str(doctor.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+# =========================================================================
 
 @app.get("/auth/me", response_model=DoctorOutSchema)
 def get_me(current_doctor: Doctor = Depends(get_current_doctor)):

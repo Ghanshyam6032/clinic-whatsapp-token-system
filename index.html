@@ -239,7 +239,7 @@
 
         .action-buttons { display: flex; gap: 1rem; margin-bottom: 2rem; }
 
-        /* --- NEW ENHANCED MONTH-WISE CALENDAR --- */
+        /* --- MONTH-WISE CALENDAR --- */
         .cal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .cal-month-title { font-size: 1.25rem; color: var(--secondary); font-weight: 700; margin: 0; }
         
@@ -386,9 +386,9 @@
 
             /* Calendar Mobile Adjustments */
             .cal-header-row { flex-direction: column; align-items: stretch; gap: 1rem; }
-            .cal-header-row > h3 { text-align: center; order: -1; } /* Put title at top on mobile */
+            .cal-header-row > h3 { text-align: center; order: -1; }
             .cal-nav-buttons { display: flex; justify-content: space-between; gap: 8px; }
-            .cal-nav-buttons .btn { flex: 1; padding: 0.5rem; font-size: 0.8rem; }
+            .cal-nav-buttons .btn { flex: 1; padding: 0.5rem; font-size: 0.8rem; min-height: 36px; }
             .cal-legend { justify-content: center; }
             
             .cal-weekdays { font-size: 0.65rem; }
@@ -446,8 +446,8 @@
             .summary-grid { grid-template-columns: 1fr; }
             .queue-hero .token-num { font-size: 3.5rem; }
             .cal-date-num { font-size: 0.85rem; }
-            .cal-badge { font-size: 0.5rem; }
-            .cal-day { min-height: 55px; }
+            .cal-badge { font-size: 0.5rem; padding: 2px; }
+            .cal-day { min-height: 55px; padding: 2px; }
         }
     </style>
 </head>
@@ -578,10 +578,9 @@
                         </div>
                     </div>
 
-                    <!-- CALENDAR TAB (NEW MONTH-WISE DESIGN) -->
+                    <!-- CALENDAR TAB -->
                     <div id="tab-calendar" class="tab-content">
                         <div class="card" style="padding: 1.5rem;">
-                            <!-- Header / Nav -->
                             <div class="cal-header-row">
                                 <div class="cal-nav-buttons">
                                     <button class="btn btn-outline" onclick="prevMonth()">&#8592; Prev</button>
@@ -593,7 +592,6 @@
                                 </div>
                             </div>
 
-                            <!-- Legend -->
                             <div class="cal-legend">
                                 <span><span class="legend-dot open"></span> Open</span>
                                 <span><span class="legend-dot closed"></span> Closed</span>
@@ -601,15 +599,12 @@
                                 <span><span class="legend-dot past"></span> Past</span>
                             </div>
 
-                            <!-- Weekdays -->
                             <div class="cal-weekdays">
                                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                             </div>
 
-                            <!-- Grid -->
                             <div class="calendar-grid" id="calendar-container"></div>
                             
-                            <!-- Information Section -->
                             <div class="cal-info-box">
                                 <h4>Clinic Schedule</h4>
                                 <p>Past dates are disabled. Click any future date to toggle the clinic between OPEN and CLOSED.</p>
@@ -766,7 +761,7 @@
 
     <script>
         // === CONFIGURATION ===
-        const API_BASE = "http://127.0.0.1:8000"; 
+        const API_BASE = "https://clinic-whatsapp-token-system-production-fc8b.up.railway.app"; 
         let authToken = localStorage.getItem("token") || "";
         let currentPatientsList = [];
         
@@ -955,12 +950,11 @@
             } catch (err) { showToast(err.message, "error"); }
         });
 
-        // --- NEW MONTH-WISE CALENDAR LOGIC ---
+        // --- CALENDAR LOGIC ---
         async function loadCalendar() {
             const year = currentCalDate.getFullYear();
-            const month = currentCalDate.getMonth() + 1; // 1-12
+            const month = currentCalDate.getMonth() + 1; 
 
-            // Set Title
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             document.getElementById("cal-month-title").innerText = `${monthNames[month-1]} ${year}`;
 
@@ -973,7 +967,6 @@
                 const container = document.getElementById("calendar-container");
                 container.innerHTML = "";
 
-                // Get day of week for 1st of month to offset grid correctly
                 const firstDay = new Date(year, month - 1, 1).getDay();
                 
                 for (let i = 0; i < firstDay; i++) {
@@ -982,12 +975,10 @@
                     container.appendChild(emptyEl);
                 }
 
-                // Get strict local "today" at midnight for accurate past/future comparison
                 const todayObj = new Date();
                 todayObj.setHours(0,0,0,0);
 
                 data.days.forEach(d => {
-                    // Safe parsing of YYYY-MM-DD to local midnight Date object
                     const [y, m, day] = d.date.split('-');
                     const cellDateObj = new Date(y, m - 1, day);
                     cellDateObj.setHours(0,0,0,0);
@@ -1014,7 +1005,6 @@
                         <div class="cal-badge ${badgeClass}">${statusText}</div>
                     `;
 
-                    // Only allow toggling for future dates and today
                     if (!isPast || isToday) {
                         dayEl.onclick = () => toggleDateStatus(d.date, d.status);
                     }
@@ -1124,7 +1114,7 @@
                                 </div>
                             </td>
                             <td class="action-cell">
-                                <button class="btn btn-outline" onclick="viewPatientHistory(${p.id})">View History</button>
+                                <button class="btn btn-outline btn-full" onclick="viewPatientHistory(${p.id})">View History</button>
                             </td>
                         </tr>
                     `;

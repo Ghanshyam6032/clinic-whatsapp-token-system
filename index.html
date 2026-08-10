@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Clinic Token SaaS Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Strict Two-Color Palette */
+            --primary: #2563EB;
+            --primary-hover: #1D4ED8;
+            --secondary: #0F172A;
+            --secondary-hover: #1E293B;
+            
+            /* Backgrounds & Text */
+            --bg-body: #F8FAFC;
+            --bg-surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
+            
+            /* Status Colors */
+            --success: #16A34A;
+            --success-bg: #DCFCE7;
+            --danger: #DC2626;
+            --danger-bg: #FEE2E2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* --- TYPOGRAPHY & UTILITIES --- */
+        h1, h2, h3, h4 { color: var(--secondary); font-weight: 600; margin-bottom: 0.5rem; }
+        .text-primary { color: var(--primary); }
+        .text-muted { color: var(--text-muted); font-size: 0.875rem; }
+        .hide-mobile { display: block; }
+        .show-mobile { display: none; }
+        
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; }
+        .flex-1 { flex: 1; }
+
+        /* --- FORMS & BUTTONS (Touch Friendly) --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            min-height: 44px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-secondary:hover { background: var(--secondary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--secondary); }
+        .btn-outline:hover { border-color: var(--secondary); background: #F1F5F9; }
+        .btn-full { width: 100%; }
+
+        .card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            margin-bottom: 1.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            min-height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+            background: var(--bg-surface);
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--secondary); }
+
+        /* --- STATUS BADGES --- */
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+        }
+        .badge-waiting { border: 1px solid var(--secondary); color: var(--secondary); background: transparent; }
+        .badge-current { background: var(--primary); color: white; border: 1px solid var(--primary); }
+        .badge-completed { background: var(--secondary); color: white; border: 1px solid var(--secondary); }
+        .badge-cancelled { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border); text-decoration: line-through; }
+
+        /* --- LOGIN SCREEN --- */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: var(--bg-body);
+            padding: 1rem;
+        }
+        .login-box { width: 100%; max-width: 400px; }
+        .login-logo { text-align: center; margin-bottom: 2rem; }
+        .login-logo svg { width: 48px; height: 48px; color: var(--primary); }
+
+        /* --- APP LAYOUT --- */
+        #app-screen { display: none; height: 100vh; overflow: hidden; }
+        .app-container { display: flex; height: 100%; width: 100%; }
+        
+        /* Sidebar (Desktop) / Bottom Nav (Mobile) */
+        .sidebar {
+            width: 260px;
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-header svg { width: 28px; height: 28px; color: var(--primary); }
+        .sidebar-header h2 { color: white; font-size: 1.25rem; margin: 0; letter-spacing: -0.5px; }
+        
+        .nav-links { padding: 1.5rem 0; flex: 1; display: flex; flex-direction: column; }
+        .nav-item {
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #CBD5E1;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .nav-item svg { width: 20px; height: 20px; }
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: white; background: rgba(255,255,255,0.05); border-left-color: var(--primary); }
+        
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        /* Top Header */
+        .topbar {
+            background: var(--bg-surface);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            z-index: 5;
+            min-height: 70px;
+        }
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; }
+        
+        .main-content { flex: 1; overflow-y: auto; padding: 2rem; -webkit-overflow-scrolling: touch; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- DASHBOARD GRIDS --- */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            padding: 1.25rem;
+            border-radius: 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+        }
+        .stat-card .value { font-size: 1.75rem; font-weight: 700; color: var(--secondary); line-height: 1; }
+        .stat-card .label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card.highlight { border-top: 4px solid var(--primary); }
+        
+        /* Queue Hero */
+        .queue-hero {
+            background: var(--secondary);
+            color: white;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+        }
+        .queue-hero::before {
+            content: ''; position: absolute; top: -50px; right: -50px; width: 300px; height: 300px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.3; border-radius: 50%;
+        }
+        .queue-hero h3 { color: var(--text-light); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .queue-hero .token-num { font-size: 5.5rem; font-weight: 800; line-height: 1; margin-bottom: 1rem; color: white; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .queue-hero .patient-info { font-size: 1.125rem; color: #E2E8F0; font-weight: 500; }
+
+        .action-buttons { display: flex; gap: 1rem; margin-bottom: 2rem; }
+
+        /* --- NEW ENHANCED MONTH-WISE CALENDAR --- */
+        .cal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .cal-month-title { font-size: 1.25rem; color: var(--secondary); font-weight: 700; margin: 0; }
+        
+        .cal-nav-buttons { display: flex; gap: 8px; }
+        .cal-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+        .legend-dot.open { background: var(--success); }
+        .legend-dot.closed { background: var(--danger); }
+        .legend-dot.today { background: var(--primary); }
+        .legend-dot.past { background: var(--border); }
+        
+        .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem; text-transform: uppercase; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        
+        .cal-day {
+            min-height: 85px;
+            padding: 8px;
+            border-radius: 8px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .cal-day.empty { background: transparent; border: none; cursor: default; }
+        
+        .cal-day.future { cursor: pointer; }
+        .cal-day.future:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); transform: translateY(-2px); }
+        .cal-day.past { background: #F8FAFC; color: var(--text-light); cursor: not-allowed; opacity: 0.6; }
+        .cal-day.today { border: 2px solid var(--primary); background: #EFF6FF; }
+        
+        .cal-date-num { font-size: 1.1rem; font-weight: 600; color: var(--secondary); margin-bottom: 4px; }
+        .cal-day.past .cal-date-num { color: var(--text-light); }
+        
+        .cal-badge { font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 100%; max-width: 70px; }
+        .cal-badge.open { background: var(--success-bg); color: var(--success); }
+        .cal-badge.closed { background: var(--danger-bg); color: var(--danger); }
+        .cal-badge.past { background: var(--border); color: var(--text-muted); }
+
+        .cal-info-box { margin-top: 1.5rem; background: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
+        .cal-info-box h4 { font-size: 0.95rem; margin-bottom: 4px; color: var(--secondary); }
+        .cal-info-box p { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+
+        /* --- TABLES (Desktop) --- */
+        .table-container { overflow-x: auto; background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #F8FAFC; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        tbody tr:hover { background: #F1F5F9; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* --- TIMELINE --- */
+        .timeline { position: relative; margin-top: 1.5rem; padding-left: 1.5rem; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot {
+            position: absolute; left: -1.85rem; top: 0.25rem; width: 14px; height: 14px;
+            border-radius: 50%; background: var(--bg-surface); border: 2px solid var(--primary);
+        }
+        .timeline-content { background: var(--bg-body); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+        .timeline-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px; }
+        .timeline-date { font-size: 0.875rem; font-weight: 600; color: var(--secondary); }
+        .timeline-token { font-size: 1rem; font-weight: 700; color: var(--primary); }
+
+        /* --- MODALS --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 2000;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: var(--bg-surface); width: 100%; max-width: 500px;
+            border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #F8FAFC; }
+        .modal-header h3 { margin: 0; font-size: 1.125rem; color: var(--secondary); }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .modal-close:hover { background: var(--border); color: var(--text-main); }
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+        
+        /* --- TOASTS --- */
+        .toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
+        .toast {
+            background: var(--secondary); color: white; padding: 1rem; border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); font-size: 0.875rem; font-weight: 500;
+            transform: translateY(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--primary); }
+
+        /* =========================================================
+           MOBILE RESPONSIVE DESIGN
+           ========================================================= */
+        @media (max-width: 1024px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .hide-mobile { display: none !important; }
+            .show-mobile { display: block !important; }
+            
+            /* Sidebar becomes Bottom Navigation */
+            .app-container { flex-direction: column; }
+            .sidebar {
+                position: fixed;
+                bottom: 0; left: 0; width: 100%;
+                height: calc(65px + env(safe-area-inset-bottom));
+                flex-direction: row;
+                padding-bottom: env(safe-area-inset-bottom);
+                border-top: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            }
+            .sidebar-header, .sidebar-footer { display: none; }
+            .nav-links { flex-direction: row; justify-content: space-around; padding: 0; margin: 0; }
+            .nav-item {
+                flex-direction: column; justify-content: center;
+                padding: 0.5rem; gap: 4px; border-left: none;
+                border-top: 3px solid transparent; flex: 1; text-align: center;
+            }
+            .nav-item.active { border-left: none; border-top-color: var(--primary); background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%); }
+            .nav-item svg { width: 22px; height: 22px; }
+            .nav-item span { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2px; }
+
+            /* Main Content Adjustments */
+            .main-wrapper { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .topbar { padding: 1rem; min-height: 60px; }
+            .main-content { padding: 1rem; }
+            .card { padding: 1rem; margin-bottom: 1rem; }
+
+            /* Queue Hero & Buttons */
+            .queue-hero { padding: 2rem 1rem; border-radius: 12px; }
+            .queue-hero .token-num { font-size: 4.5rem; }
+            .action-buttons { flex-direction: column; gap: 0.75rem; }
+            .btn-large { width: 100%; padding: 1rem; font-size: 1rem; }
+
+            /* Search & Filters */
+            .flex-row { flex-direction: column; align-items: stretch; gap: 0.75rem; margin-bottom: 1rem; }
+            .flex-row > * { width: 100%; }
+
+            /* Calendar Mobile Adjustments */
+            .cal-header-row { flex-direction: column; align-items: stretch; gap: 1rem; }
+            .cal-header-row > h3 { text-align: center; order: -1; } /* Put title at top on mobile */
+            .cal-nav-buttons { display: flex; justify-content: space-between; gap: 8px; }
+            .cal-nav-buttons .btn { flex: 1; padding: 0.5rem; font-size: 0.8rem; }
+            .cal-legend { justify-content: center; }
+            
+            .cal-weekdays { font-size: 0.65rem; }
+            .calendar-grid { gap: 4px; }
+            .cal-day { min-height: 65px; padding: 4px; border-radius: 6px; }
+            .cal-date-num { font-size: 0.95rem; }
+            .cal-badge { font-size: 0.55rem; padding: 2px 4px; max-width: 100%; letter-spacing: 0; }
+
+            /* Modals Mobile */
+            .modal-content { max-height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top)); border-radius: 12px; }
+            .modal-overlay { padding: 0.5rem; align-items: flex-end; } 
+            
+            /* TOAST placement */
+            .toast-container { bottom: calc(80px + env(safe-area-inset-bottom)); }
+
+            /* Responsive Tables -> Cards */
+            .table-container { border: none; background: transparent; box-shadow: none; overflow: visible; }
+            table, thead, tbody, th, td, tr { display: block; width: 100%; white-space: normal; }
+            thead tr { display: none; }
+            
+            tbody tr {
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                box-shadow: 0 2px 5px rgba(15,23,42,0.04);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            tbody td {
+                border: none;
+                border-bottom: 1px solid var(--border);
+                padding: 0.875rem 1rem;
+                position: relative;
+                text-align: left;
+            }
+            tbody td:last-child { border-bottom: none; background: #F8FAFC; padding: 1rem; }
+
+            td::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 0.7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--primary);
+                margin-bottom: 0.35rem;
+                letter-spacing: 0.5px;
+            }
+            td.action-cell::before { display: none; }
+            td.action-cell .btn { width: 100%; }
+        }
+        
+        @media (max-width: 360px) {
+            .summary-grid { grid-template-columns: 1fr; }
+            .queue-hero .token-num { font-size: 3.5rem; }
+            .cal-date-num { font-size: 0.85rem; }
+            .cal-badge { font-size: 0.5rem; }
+            .cal-day { min-height: 55px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-logo">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                <h2 style="margin-top: 1rem; color: var(--secondary);">Clinic Portal</h2>
+            </div>
+            <div class="card" style="padding: 2rem;">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Admin Username</label>
+                        <input type="text" id="email" required placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1rem;">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen">
+        <div class="app-container">
+            
+            <!-- SIDEBAR / MOBILE BOTTOM NAV -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <h2 id="sidebar-clinic-name">Clinic SaaS</h2>
+                </div>
+                <nav class="nav-links">
+                    <a class="nav-item active" onclick="switchTab('today')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span>Today</span>
+                    </a>
+                    <a class="nav-item" onclick="switchTab('calendar')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Calendar</span>
+                    </a>
+                    <a class="nav-item" onclick="switchTab('patients')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span>Patients</span>
+                    </a>
+                    <a class="nav-item" onclick="switchTab('history')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <span>History</span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="btn btn-outline btn-full" style="border-color:rgba(255,255,255,0.2); color:white;" onclick="logout()">
+                        <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Sign Out
+                    </button>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT WRAPPER -->
+            <div class="main-wrapper">
+                
+                <!-- TOP HEADER -->
+                <header class="topbar">
+                    <div>
+                        <h2 style="font-size: 1.125rem; margin-bottom: 2px;" id="topbar-date">Loading...</h2>
+                        <span class="text-muted hide-mobile" style="font-size: 0.8rem;">Manage your daily appointments safely.</span>
+                    </div>
+                    <div class="user-profile">
+                        <div style="text-align: right;" class="hide-mobile">
+                            <strong style="display: block; font-size: 0.875rem;" id="doctor-name">Dr. Name</strong>
+                            <span class="text-muted" style="font-size: 0.75rem;">Administrator</span>
+                        </div>
+                        <div class="avatar" id="doctor-initial">D</div>
+                        
+                        <!-- Mobile Logout Icon -->
+                        <button class="btn btn-outline show-mobile" style="padding: 0.5rem; min-height: auto; border:none;" onclick="logout()">
+                            <svg style="width:24px;height:24px; color:var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        </button>
+                    </div>
+                </header>
+
+                <main class="main-content">
+                    
+                    <!-- TODAY TAB -->
+                    <div id="tab-today" class="tab-content active">
+                        <div class="queue-hero">
+                            <h3>Current Token Serving</h3>
+                            <div class="token-num" id="curr-token-num">#--</div>
+                            <div class="patient-info" id="curr-patient-details">No patient currently undergoing treatment.</div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-large flex-1" onclick="callNextPatient()">
+                                Call Next Patient ➔
+                            </button>
+                            <button class="btn btn-secondary btn-large flex-1" onclick="openWalkinModal()">
+                                + Add Walk-in
+                            </button>
+                        </div>
+
+                        <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Today's Overview</h3>
+                        <div class="summary-grid">
+                            <div class="stat-card highlight">
+                                <span class="label">Total Tokens</span>
+                                <span class="value" id="stat-total">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="label">Waiting</span>
+                                <span class="value" style="color: var(--primary);" id="stat-waiting">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="label">Completed</span>
+                                <span class="value" id="stat-completed">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="label">Cancelled</span>
+                                <span class="value text-muted" id="stat-cancelled">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CALENDAR TAB (NEW MONTH-WISE DESIGN) -->
+                    <div id="tab-calendar" class="tab-content">
+                        <div class="card" style="padding: 1.5rem;">
+                            <!-- Header / Nav -->
+                            <div class="cal-header-row">
+                                <div class="cal-nav-buttons">
+                                    <button class="btn btn-outline" onclick="prevMonth()">&#8592; Prev</button>
+                                </div>
+                                <h3 class="cal-month-title" id="cal-month-title">Month Year</h3>
+                                <div class="cal-nav-buttons">
+                                    <button class="btn btn-outline" onclick="goToToday()">Today</button>
+                                    <button class="btn btn-outline" onclick="nextMonth()">Next &#8594;</button>
+                                </div>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="cal-legend">
+                                <span><span class="legend-dot open"></span> Open</span>
+                                <span><span class="legend-dot closed"></span> Closed</span>
+                                <span><span class="legend-dot today"></span> Today</span>
+                                <span><span class="legend-dot past"></span> Past</span>
+                            </div>
+
+                            <!-- Weekdays -->
+                            <div class="cal-weekdays">
+                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                            </div>
+
+                            <!-- Grid -->
+                            <div class="calendar-grid" id="calendar-container"></div>
+                            
+                            <!-- Information Section -->
+                            <div class="cal-info-box">
+                                <h4>Clinic Schedule</h4>
+                                <p>Past dates are disabled. Click any future date to toggle the clinic between OPEN and CLOSED.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PATIENTS TAB -->
+                    <div id="tab-patients" class="tab-content">
+                        <div class="summary-grid" style="margin-bottom: 1.5rem;">
+                            <div class="stat-card highlight"><span class="label">Total Patients</span><span class="value" id="sum-tot-patients">0</span></div>
+                            <div class="stat-card"><span class="label">New Patients</span><span class="value" id="sum-new-patients" style="color: var(--primary);">0</span></div>
+                            <div class="stat-card"><span class="label">Returning</span><span class="value" id="sum-ret-patients" style="color: var(--secondary);">0</span></div>
+                            <div class="stat-card"><span class="label">Total Visits</span><span class="value" id="sum-tot-visits">0</span></div>
+                        </div>
+
+                        <div class="card" style="padding: 0; border: none; background: transparent; box-shadow: none;">
+                            <div class="flex-row">
+                                <div class="flex-1">
+                                    <input type="text" id="patient-search" placeholder="Search name or WhatsApp...">
+                                </div>
+                                <select id="patient-date-filter" onchange="handlePatientDateFilter()">
+                                    <option value="ALL">All Time</option>
+                                    <option value="TODAY">Today</option>
+                                    <option value="WEEK">This Week</option>
+                                    <option value="MONTH">This Month</option>
+                                    <option value="CUSTOM">Custom Range</option>
+                                </select>
+                                <input type="date" id="patient-start-date" style="display:none;" onchange="searchPatients()">
+                                <input type="date" id="patient-end-date" style="display:none;" onchange="searchPatients()">
+                                <button class="btn btn-primary" onclick="searchPatients()">Search</button>
+                            </div>
+
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Patient Info</th>
+                                            <th>Visit Summary</th>
+                                            <th>Timeline Data</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="patients-table-body">
+                                        <tr><td colspan="4" style="text-align:center; padding: 2rem;" class="text-muted">Search or load patients...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOKEN HISTORY TAB -->
+                    <div id="tab-history" class="tab-content">
+                        <div class="card" style="padding: 0; border: none; background: transparent; box-shadow: none;">
+                            <div class="flex-row">
+                                <input type="date" id="history-date" class="flex-1">
+                                <select id="history-filter" class="flex-1">
+                                    <option value="ALL">All Status</option>
+                                    <option value="WAITING">Waiting</option>
+                                    <option value="CURRENT">Current</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="CANCELLED">Cancelled</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="loadTokenHistory()">Filter</button>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Token</th>
+                                            <th>Patient Name</th>
+                                            <th>Reason</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <tr><td colspan="5" style="text-align:center; padding: 2rem;" class="text-muted">Select a date to view tokens...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: WALK-IN PATIENT -->
+    <div class="modal-overlay" id="walkin-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Walk-in Patient</h3>
+                <button type="button" class="modal-close" onclick="closeWalkinModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="walkin-form">
+                    <div class="form-group">
+                        <label>WhatsApp / Phone Number</label>
+                        <input type="tel" id="walkin-phone" placeholder="e.g. 919876543210" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="walkin-name" placeholder="Patient Name" required autocomplete="off">
+                    </div>
+                    <div class="flex-row" style="margin-bottom: 0;">
+                        <div class="form-group flex-1">
+                            <label>Age</label>
+                            <input type="number" id="walkin-age" min="0" max="120" placeholder="e.g. 25" required>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Gender</label>
+                            <select id="walkin-gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Reason for Visit</label>
+                        <input type="text" id="walkin-reason" placeholder="e.g. Fever, Checkup" required autocomplete="off">
+                    </div>
+                    <div style="display:flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-outline flex-1" onclick="closeWalkinModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary flex-1">Generate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PATIENT HISTORY (TIMELINE) -->
+    <div class="modal-overlay" id="patient-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Patient Details</h3>
+                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="background: var(--bg-body);">
+                <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+                    <div id="modal-patient-info"></div>
+                </div>
+                
+                <h4 style="margin-bottom: 1rem; font-size: 1rem;">Visit Timeline</h4>
+                <div class="timeline" id="modal-timeline-body">
+                    <!-- Timeline items injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURATION ===
+        const API_BASE = "http://127.0.0.1:8000"; 
+        let authToken = localStorage.getItem("token") || "";
+        let currentPatientsList = [];
+        
+        // Calendar State
+        let currentCalDate = new Date();
+
+        // Set topbar date
+        document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+
+        // --- UTILS ---
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' 
+                ? `<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+                : `<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add("show"), 10);
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function getStatusBadge(status) {
+            const s = status.toUpperCase();
+            if(s === 'WAITING') return `<span class="badge badge-waiting">WAITING</span>`;
+            if(s === 'CURRENT') return `<span class="badge badge-current">CURRENT</span>`;
+            if(s === 'COMPLETED') return `<span class="badge badge-completed">COMPLETED</span>`;
+            if(s === 'CANCELLED') return `<span class="badge badge-cancelled">CANCELLED</span>`;
+            return `<span class="badge">${status}</span>`;
+        }
+
+        // --- AUTH ---
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const formData = new URLSearchParams();
+            formData.append("username", email);
+            formData.append("password", password);
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData
+                });
+
+                if (!res.ok) throw new Error("Invalid username or password");
+                const data = await res.json();
+                authToken = data.access_token;
+                localStorage.setItem("token", authToken);
+                initDashboard();
+                showToast("Logged in successfully");
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem("token");
+            location.reload();
+        }
+
+        async function initDashboard() {
+            if (!authToken) return;
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                if (!res.ok) throw new Error("Session expired");
+                const doctor = await res.json();
+
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("app-screen").style.display = "block";
+                document.getElementById("sidebar-clinic-name").innerText = doctor.clinic_name;
+                document.getElementById("doctor-name").innerText = doctor.name;
+                document.getElementById("doctor-initial").innerText = doctor.name.charAt(0).toUpperCase();
+
+                loadTodaySummary();
+                setInterval(loadTodaySummary, 15000); 
+            } catch (err) {
+                logout();
+            }
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tabName) {
+            document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+
+            event.currentTarget.classList.add("active");
+            document.getElementById(`tab-${tabName}`).classList.add("active");
+
+            if (tabName === 'today') loadTodaySummary();
+            if (tabName === 'calendar') loadCalendar();
+            if (tabName === 'patients') handlePatientDateFilter();
+            if (tabName === 'history') {
+                if(!document.getElementById("history-date").value) {
+                    document.getElementById("history-date").valueAsDate = new Date();
+                }
+                loadTokenHistory();
+            }
+        }
+
+        // --- TODAY TAB ---
+        async function loadTodaySummary() {
+            try {
+                const res = await fetch(`${API_BASE}/doctor/today`, {
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+
+                document.getElementById("stat-waiting").innerText = data.waiting_count;
+                document.getElementById("stat-completed").innerText = data.completed_count;
+                document.getElementById("stat-cancelled").innerText = data.cancelled_count;
+                document.getElementById("stat-total").innerText = data.total_count;
+
+                const currDiv = document.getElementById("curr-token-num");
+                const detailDiv = document.getElementById("curr-patient-details");
+
+                if (data.current_visit) {
+                    currDiv.innerText = `#${data.current_visit.token_number}`;
+                    detailDiv.innerHTML = `<strong>${data.current_visit.patient_name}</strong> <span style="opacity:0.8; font-size:0.9rem;">&nbsp;|&nbsp; ${data.current_visit.patient_age} yrs, ${data.current_visit.patient_gender}</span><br><span style="opacity:0.9; font-size:0.95rem; margin-top:8px; display:block;">Reason: ${data.current_visit.visit_reason}</span>`;
+                } else {
+                    currDiv.innerText = "#--";
+                    detailDiv.innerText = "No patient currently undergoing treatment.";
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function callNextPatient() {
+            try {
+                const res = await fetch(`${API_BASE}/doctor/next-patient`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if(data.message.includes("No waiting")) {
+                    showToast(data.message, "error");
+                } else {
+                    showToast(data.message, "success");
+                }
+                loadTodaySummary();
+            } catch (err) { showToast("Error calling next patient", "error"); }
+        }
+
+        // --- WALKIN MODAL ---
+        function openWalkinModal() {
+            document.getElementById("walkin-modal").style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+        function closeWalkinModal() {
+            document.getElementById("walkin-modal").style.display = "none";
+            document.getElementById("walkin-form").reset();
+            document.body.style.overflow = "auto";
+        }
+
+        document.getElementById("walkin-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const payload = {
+                whatsapp_number: document.getElementById("walkin-phone").value,
+                name: document.getElementById("walkin-name").value,
+                age: parseInt(document.getElementById("walkin-age").value),
+                gender: document.getElementById("walkin-gender").value,
+                visit_reason: document.getElementById("walkin-reason").value
+            };
+            try {
+                const res = await fetch(`${API_BASE}/doctor/add-walkin`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${authToken}` },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Error generating token");
+                
+                showToast(`Token #${data.token_number} Generated Successfully`);
+                closeWalkinModal();
+                loadTodaySummary();
+            } catch (err) { showToast(err.message, "error"); }
+        });
+
+        // --- NEW MONTH-WISE CALENDAR LOGIC ---
+        async function loadCalendar() {
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth() + 1; // 1-12
+
+            // Set Title
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById("cal-month-title").innerText = `${monthNames[month-1]} ${year}`;
+
+            try {
+                const res = await fetch(`${API_BASE}/doctor/calendar/${year}/${month}`, {
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+
+                const container = document.getElementById("calendar-container");
+                container.innerHTML = "";
+
+                // Get day of week for 1st of month to offset grid correctly
+                const firstDay = new Date(year, month - 1, 1).getDay();
+                
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyEl = document.createElement("div");
+                    emptyEl.className = "cal-day empty";
+                    container.appendChild(emptyEl);
+                }
+
+                // Get strict local "today" at midnight for accurate past/future comparison
+                const todayObj = new Date();
+                todayObj.setHours(0,0,0,0);
+
+                data.days.forEach(d => {
+                    // Safe parsing of YYYY-MM-DD to local midnight Date object
+                    const [y, m, day] = d.date.split('-');
+                    const cellDateObj = new Date(y, m - 1, day);
+                    cellDateObj.setHours(0,0,0,0);
+
+                    const isPast = cellDateObj < todayObj;
+                    const isToday = cellDateObj.getTime() === todayObj.getTime();
+
+                    const dayEl = document.createElement("div");
+                    
+                    let classes = ["cal-day"];
+                    if (isPast) classes.push("past");
+                    else classes.push("future");
+                    if (isToday) classes.push("today");
+
+                    dayEl.className = classes.join(" ");
+                    
+                    let badgeClass = d.status === "OPEN" ? "open" : "closed";
+                    if (isPast && !isToday) badgeClass = "past";
+
+                    let statusText = d.status;
+
+                    dayEl.innerHTML = `
+                        <div class="cal-date-num">${d.day}</div>
+                        <div class="cal-badge ${badgeClass}">${statusText}</div>
+                    `;
+
+                    // Only allow toggling for future dates and today
+                    if (!isPast || isToday) {
+                        dayEl.onclick = () => toggleDateStatus(d.date, d.status);
+                    }
+
+                    container.appendChild(dayEl);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        function prevMonth() {
+            currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+            loadCalendar();
+        }
+
+        function nextMonth() {
+            currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+            loadCalendar();
+        }
+
+        function goToToday() {
+            currentCalDate = new Date();
+            loadCalendar();
+        }
+
+        async function toggleDateStatus(dateStr, currentStatus) {
+            const endpoint = currentStatus === "OPEN" ? "close" : "open";
+            try {
+                await fetch(`${API_BASE}/doctor/calendar/${dateStr}/${endpoint}`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+                loadCalendar();
+                showToast(`Date marked as ${endpoint === 'close' ? 'CLOSED' : 'OPEN'}`);
+            } catch (err) { showToast("Failed to change date status", "error"); }
+        }
+
+        // --- PATIENTS TAB ---
+        function handlePatientDateFilter() {
+            const filter = document.getElementById("patient-date-filter").value;
+            const startInput = document.getElementById("patient-start-date");
+            const endInput = document.getElementById("patient-end-date");
+            
+            if (filter === "CUSTOM") {
+                startInput.style.display = "block"; endInput.style.display = "block";
+            } else {
+                startInput.style.display = "none"; endInput.style.display = "none";
+                const today = new Date();
+                
+                if (filter === "ALL") { startInput.value = ""; endInput.value = ""; } 
+                else if (filter === "TODAY") { startInput.valueAsDate = today; endInput.valueAsDate = today; } 
+                else if (filter === "WEEK") {
+                    const firstDay = new Date(today.setDate(today.getDate() - today.getDay()));
+                    startInput.valueAsDate = firstDay; endInput.valueAsDate = new Date();
+                } 
+                else if (filter === "MONTH") {
+                    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                    startInput.valueAsDate = firstDay; endInput.valueAsDate = new Date();
+                }
+            }
+            searchPatients();
+        }
+
+        async function searchPatients() {
+            const q = document.getElementById("patient-search").value;
+            const startDate = document.getElementById("patient-start-date").value;
+            const endDate = document.getElementById("patient-end-date").value;
+
+            try {
+                const sumRes = await fetch(`${API_BASE}/doctor/patients-summary?query=${encodeURIComponent(q)}&start_date=${startDate}&end_date=${endDate}`, { headers: { "Authorization": `Bearer ${authToken}` }});
+                if(sumRes.ok) {
+                    const sumData = await sumRes.json();
+                    document.getElementById("sum-tot-patients").innerText = sumData.total_patients;
+                    document.getElementById("sum-new-patients").innerText = sumData.new_patients;
+                    document.getElementById("sum-ret-patients").innerText = sumData.returning_patients;
+                    document.getElementById("sum-tot-visits").innerText = sumData.total_visits;
+                }
+            } catch (err) {}
+
+            try {
+                const res = await fetch(`${API_BASE}/doctor/patients?query=${encodeURIComponent(q)}&start_date=${startDate}&end_date=${endDate}`, { headers: { "Authorization": `Bearer ${authToken}` }});
+                currentPatientsList = await res.json();
+                const tbody = document.getElementById("patients-table-body");
+                tbody.innerHTML = "";
+
+                if(currentPatientsList.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem;" class="text-muted">No patients found.</td></tr>`;
+                    return;
+                }
+
+                currentPatientsList.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td data-label="Patient Details">
+                                <strong style="color:var(--secondary); font-size:1rem;">${p.name}</strong><br>
+                                <span class="text-muted" style="margin-top:2px; display:inline-block;">📞 ${p.whatsapp_number}</span><br>
+                                <span class="text-muted" style="margin-top:2px; display:inline-block;">🎂 ${p.age} yrs &nbsp;|&nbsp; ⚥ ${p.gender}</span>
+                            </td>
+                            <td data-label="Visit Counts">
+                                <strong>${p.visit_count} Total Visits</strong><br>
+                                <span class="text-muted" style="font-size:0.8rem; margin-top:2px; display:inline-block;">Done: ${p.total_completed} &nbsp;|&nbsp; Wait: ${p.total_waiting} &nbsp;|&nbsp; Canc: ${p.total_cancelled}</span>
+                            </td>
+                            <td data-label="History Summary">
+                                <div style="font-size: 0.85rem; line-height: 1.4;">
+                                    <span class="text-muted">First:</span> <strong>${p.first_visit_date || '-'}</strong><br>
+                                    <span class="text-muted">Last:</span> <strong>${p.last_visit_date || '-'}</strong><br>
+                                    <span class="text-muted">Reason:</span> <span>${p.last_visit_reason || '-'}</span>
+                                </div>
+                            </td>
+                            <td class="action-cell">
+                                <button class="btn btn-outline" onclick="viewPatientHistory(${p.id})">View History</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) { showToast("Failed to fetch patients", "error"); }
+        }
+
+        async function viewPatientHistory(patientId) {
+            const p = currentPatientsList.find(x => x.id === patientId);
+            if (!p) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/doctor/patients/${patientId}/history`, { headers: { "Authorization": `Bearer ${authToken}` }});
+                const history = await res.json();
+
+                document.getElementById("modal-patient-info").innerHTML = `
+                    <div style="display:flex; flex-wrap: wrap; justify-content:space-between; align-items:flex-start; gap: 10px;">
+                        <div>
+                            <h2 style="margin-bottom: 4px; color: var(--primary); font-size: 1.25rem;">${p.name}</h2>
+                            <div class="text-muted" style="font-size: 0.875rem;">📞 ${p.whatsapp_number} <br class="show-mobile"> <span class="hide-mobile">&bull;</span> 🎂 ${p.age} yrs &bull; ⚥ ${p.gender}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <strong style="font-size: 1.25rem;">${p.visit_count}</strong><br>
+                            <span class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Total Visits</span>
+                        </div>
+                    </div>
+                `;
+
+                const timeline = document.getElementById("modal-timeline-body");
+                timeline.innerHTML = "";
+
+                if(history.length === 0) {
+                    timeline.innerHTML = `<p class="text-muted" style="text-align:center; padding: 1rem;">No visits recorded.</p>`;
+                } else {
+                    history.forEach(v => {
+                        let timeStr = new Date(v.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        let extraInfo = '';
+                        if(v.status === 'COMPLETED' && v.completed_at) extraInfo = `<br><span class="text-muted" style="font-size:0.75rem; margin-top:4px; display:inline-block;">Completed at: ${new Date(v.completed_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
+                        else if(v.status === 'CANCELLED' && v.cancelled_at) extraInfo = `<br><span class="text-muted" style="font-size:0.75rem; margin-top:4px; display:inline-block;">Cancelled at: ${new Date(v.cancelled_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
+
+                        timeline.innerHTML += `
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-header">
+                                        <div>
+                                            <div class="timeline-date">${v.visit_date}</div>
+                                            <span class="text-muted" style="font-size:0.75rem;">${timeStr}</span>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div class="timeline-token">Token #${v.token_number}</div>
+                                            <div style="margin-top:4px;">${getStatusBadge(v.status)}</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size:0.875rem; margin-top:0.5rem; color: var(--text-main); line-height:1.4;">
+                                        <span class="text-muted">Reason:</span> <strong>${v.visit_reason}</strong>
+                                        ${extraInfo}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById("patient-modal").style.display = "flex";
+                document.body.style.overflow = "hidden";
+            } catch (err) { showToast("Error loading patient history", "error"); }
+        }
+
+        function closeModal() {
+            document.getElementById("patient-modal").style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+
+        // --- TOKEN HISTORY TAB ---
+        async function loadTokenHistory() {
+            const dateStr = document.getElementById("history-date").value;
+            const filter = document.getElementById("history-filter").value;
+
+            try {
+                const res = await fetch(`${API_BASE}/doctor/tokens?date_str=${dateStr}&status_filter=${filter}`, { headers: { "Authorization": `Bearer ${authToken}` }});
+                const tokens = await res.json();
+                const tbody = document.getElementById("history-table-body");
+                tbody.innerHTML = "";
+                
+                if(tokens.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem;" class="text-muted">No tokens found for this criteria.</td></tr>`;
+                    return;
+                }
+
+                tokens.forEach(t => {
+                    const timeStr = new Date(t.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    tbody.innerHTML += `
+                        <tr>
+                            <td data-label="Token No."><strong style="color:var(--primary); font-size:1.1rem;">#${t.token_number}</strong></td>
+                            <td data-label="Patient Name" style="font-weight:500;">${t.patient_name}</td>
+                            <td data-label="Visit Reason">${t.visit_reason}</td>
+                            <td data-label="Created Time" class="text-muted" style="font-size:0.85rem;">${timeStr}</td>
+                            <td data-label="Current Status">${getStatusBadge(t.status)}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) { showToast("Error loading tokens", "error"); }
+        }
+
+        if (authToken) initDashboard();
+    </script>
+</body>
+</html>

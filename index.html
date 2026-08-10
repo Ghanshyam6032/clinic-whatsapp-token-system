@@ -7,21 +7,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Strict Two-Color Palette */
             --primary: #2563EB;
             --primary-hover: #1D4ED8;
             --secondary: #0F172A;
             --secondary-hover: #1E293B;
-            
-            /* Backgrounds & Text */
             --bg-body: #F8FAFC;
             --bg-surface: #FFFFFF;
             --border: #E2E8F0;
             --text-main: #0F172A;
             --text-muted: #64748B;
             --text-light: #94A3B8;
-            
-            /* Status Colors */
             --success: #16A34A;
             --success-bg: #DCFCE7;
             --danger: #DC2626;
@@ -46,7 +41,6 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* --- TYPOGRAPHY & UTILITIES --- */
         h1, h2, h3, h4 { color: var(--secondary); font-weight: 600; margin-bottom: 0.5rem; }
         .text-primary { color: var(--primary); }
         .text-muted { color: var(--text-muted); font-size: 0.875rem; }
@@ -56,7 +50,6 @@
         .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; }
         .flex-1 { flex: 1; }
 
-        /* --- FORMS & BUTTONS (Touch Friendly) --- */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -104,7 +97,6 @@
         .form-group { margin-bottom: 1.25rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--secondary); }
 
-        /* --- STATUS BADGES --- */
         .badge {
             padding: 0.35rem 0.75rem;
             border-radius: 999px;
@@ -118,24 +110,10 @@
         .badge-completed { background: var(--secondary); color: white; border: 1px solid var(--secondary); }
         .badge-cancelled { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border); text-decoration: line-through; }
 
-        /* --- LOGIN SCREEN --- */
-        #login-screen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: var(--bg-body);
-            padding: 1rem;
-        }
-        .login-box { width: 100%; max-width: 400px; }
-        .login-logo { text-align: center; margin-bottom: 2rem; }
-        .login-logo svg { width: 48px; height: 48px; color: var(--primary); }
-
-        /* --- APP LAYOUT --- */
+        /* --- APP LAYOUT (Login Screen Removed) --- */
         #app-screen { display: none; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; width: 100%; }
         
-        /* Sidebar (Desktop) / Bottom Nav (Mobile) */
         .sidebar {
             width: 260px;
             background: var(--secondary);
@@ -175,7 +153,6 @@
         
         .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
-        /* Top Header */
         .topbar {
             background: var(--bg-surface);
             padding: 1rem 1.5rem;
@@ -195,7 +172,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- DASHBOARD GRIDS --- */
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -216,7 +192,6 @@
         .stat-card .label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card.highlight { border-top: 4px solid var(--primary); }
         
-        /* Queue Hero */
         .queue-hero {
             background: var(--secondary);
             color: white;
@@ -239,10 +214,8 @@
 
         .action-buttons { display: flex; gap: 1rem; margin-bottom: 2rem; }
 
-        /* --- MONTH-WISE CALENDAR --- */
         .cal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .cal-month-title { font-size: 1.25rem; color: var(--secondary); font-weight: 700; margin: 0; }
-        
         .cal-nav-buttons { display: flex; gap: 8px; }
         .cal-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
         .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
@@ -253,7 +226,6 @@
         
         .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem; text-transform: uppercase; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        
         .cal-day {
             min-height: 85px;
             padding: 8px;
@@ -264,15 +236,12 @@
             transition: all 0.2s ease;
         }
         .cal-day.empty { background: transparent; border: none; cursor: default; }
-        
         .cal-day.future { cursor: pointer; }
         .cal-day.future:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); transform: translateY(-2px); }
         .cal-day.past { background: #F8FAFC; color: var(--text-light); cursor: not-allowed; opacity: 0.6; }
         .cal-day.today { border: 2px solid var(--primary); background: #EFF6FF; }
-        
         .cal-date-num { font-size: 1.1rem; font-weight: 600; color: var(--secondary); margin-bottom: 4px; }
         .cal-day.past .cal-date-num { color: var(--text-light); }
-        
         .cal-badge { font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 100%; max-width: 70px; }
         .cal-badge.open { background: var(--success-bg); color: var(--success); }
         .cal-badge.closed { background: var(--danger-bg); color: var(--danger); }
@@ -282,7 +251,6 @@
         .cal-info-box h4 { font-size: 0.95rem; margin-bottom: 4px; color: var(--secondary); }
         .cal-info-box p { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
-        /* --- TABLES (Desktop) --- */
         .table-container { overflow-x: auto; background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; }
         th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border); }
@@ -290,7 +258,6 @@
         tbody tr:hover { background: #F1F5F9; }
         tbody tr:last-child td { border-bottom: none; }
 
-        /* --- TIMELINE --- */
         .timeline { position: relative; margin-top: 1.5rem; padding-left: 1.5rem; }
         .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); }
         .timeline-item { position: relative; margin-bottom: 1.5rem; }
@@ -304,7 +271,6 @@
         .timeline-date { font-size: 0.875rem; font-weight: 600; color: var(--secondary); }
         .timeline-token { font-size: 1rem; font-weight: 700; color: var(--primary); }
 
-        /* --- MODALS --- */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
@@ -324,7 +290,6 @@
         .modal-close:hover { background: var(--border); color: var(--text-main); }
         .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
         
-        /* --- TOASTS --- */
         .toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
         .toast {
             background: var(--secondary); color: white; padding: 1rem; border-radius: 8px;
@@ -335,9 +300,6 @@
         .toast.show { transform: translateY(0); opacity: 1; }
         .toast.success { background: var(--primary); }
 
-        /* =========================================================
-           MOBILE RESPONSIVE DESIGN
-           ========================================================= */
         @media (max-width: 1024px) {
             .summary-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -346,7 +308,6 @@
             .hide-mobile { display: none !important; }
             .show-mobile { display: block !important; }
             
-            /* Sidebar becomes Bottom Navigation */
             .app-container { flex-direction: column; }
             .sidebar {
                 position: fixed;
@@ -368,23 +329,19 @@
             .nav-item svg { width: 22px; height: 22px; }
             .nav-item span { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2px; }
 
-            /* Main Content Adjustments */
             .main-wrapper { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
             .topbar { padding: 1rem; min-height: 60px; }
             .main-content { padding: 1rem; }
             .card { padding: 1rem; margin-bottom: 1rem; }
 
-            /* Queue Hero & Buttons */
             .queue-hero { padding: 2rem 1rem; border-radius: 12px; }
             .queue-hero .token-num { font-size: 4.5rem; }
             .action-buttons { flex-direction: column; gap: 0.75rem; }
             .btn-large { width: 100%; padding: 1rem; font-size: 1rem; }
 
-            /* Search & Filters */
             .flex-row { flex-direction: column; align-items: stretch; gap: 0.75rem; margin-bottom: 1rem; }
             .flex-row > * { width: 100%; }
 
-            /* Calendar Mobile Adjustments */
             .cal-header-row { flex-direction: column; align-items: stretch; gap: 1rem; }
             .cal-header-row > h3 { text-align: center; order: -1; }
             .cal-nav-buttons { display: flex; justify-content: space-between; gap: 8px; }
@@ -397,14 +354,11 @@
             .cal-date-num { font-size: 0.95rem; }
             .cal-badge { font-size: 0.55rem; padding: 2px 4px; max-width: 100%; letter-spacing: 0; }
 
-            /* Modals Mobile */
             .modal-content { max-height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top)); border-radius: 12px; }
             .modal-overlay { padding: 0.5rem; align-items: flex-end; } 
             
-            /* TOAST placement */
             .toast-container { bottom: calc(80px + env(safe-area-inset-bottom)); }
 
-            /* Responsive Tables -> Cards */
             .table-container { border: none; background: transparent; box-shadow: none; overflow: visible; }
             table, thead, tbody, th, td, tr { display: block; width: 100%; white-space: normal; }
             thead tr { display: none; }
@@ -456,31 +410,8 @@
     <!-- TOAST CONTAINER -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen">
-        <div class="login-box">
-            <div class="login-logo">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                <h2 style="margin-top: 1rem; color: var(--secondary);">Clinic Portal</h2>
-            </div>
-            <div class="card" style="padding: 2rem;">
-                <form id="login-form">
-                    <div class="form-group">
-                        <label>Admin Username</label>
-                        <input type="text" id="email" required placeholder="Enter username">
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="password" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1rem;">Sign In</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN APP SCREEN -->
-    <div id="app-screen">
+    <!-- MAIN APP SCREEN (Login UI Removed, Always Visible) -->
+    <div id="app-screen" style="display: block;">
         <div class="app-container">
             
             <!-- SIDEBAR / MOBILE BOTTOM NAV -->
@@ -507,12 +438,7 @@
                         <span>History</span>
                     </a>
                 </nav>
-                <div class="sidebar-footer">
-                    <button class="btn btn-outline btn-full" style="border-color:rgba(255,255,255,0.2); color:white;" onclick="logout()">
-                        <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Sign Out
-                    </button>
-                </div>
+                <!-- Logout Button is completely removed since there is no login anymore -->
             </aside>
 
             <!-- MAIN CONTENT WRAPPER -->
@@ -530,11 +456,6 @@
                             <span class="text-muted" style="font-size: 0.75rem;">Administrator</span>
                         </div>
                         <div class="avatar" id="doctor-initial">D</div>
-                        
-                        <!-- Mobile Logout Icon -->
-                        <button class="btn btn-outline show-mobile" style="padding: 0.5rem; min-height: auto; border:none;" onclick="logout()">
-                            <svg style="width:24px;height:24px; color:var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        </button>
                     </div>
                 </header>
 
@@ -762,13 +683,10 @@
     <script>
         // === CONFIGURATION ===
         const API_BASE = "https://clinic-whatsapp-token-system-production-fc8b.up.railway.app"; 
-        let authToken = localStorage.getItem("token") || "";
+        let authToken = "";
         let currentPatientsList = [];
-        
-        // Calendar State
         let currentCalDate = new Date();
 
-        // Set topbar date
         document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
 
         // --- UTILS ---
@@ -776,14 +694,11 @@
             const container = document.getElementById("toast-container");
             const toast = document.createElement("div");
             toast.className = `toast ${type}`;
-            
             const icon = type === 'success' 
                 ? `<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
                 : `<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-            
             toast.innerHTML = `${icon} <span>${message}</span>`;
             container.appendChild(toast);
-            
             setTimeout(() => toast.classList.add("show"), 10);
             setTimeout(() => {
                 toast.classList.remove("show");
@@ -800,36 +715,28 @@
             return `<span class="badge">${status}</span>`;
         }
 
-        // --- AUTH ---
-        document.getElementById("login-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const formData = new URLSearchParams();
-            formData.append("username", email);
-            formData.append("password", password);
-
+        // =========================================================
+        // NO PASSWORD AUTO-LOGIN LOGIC
+        // =========================================================
+        async function autoLogin() {
             try {
+                // सीधे बैकएंड के लॉगिन रूट पर बिना पासवर्ड के रिक्वेस्ट भेज रहे हैं 
+                // (main.py में हमने पहले ही पासवर्ड चेकिंग हटा दी है)
                 const res = await fetch(`${API_BASE}/auth/login`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: formData
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
                 });
-
-                if (!res.ok) throw new Error("Invalid username or password");
+                
+                if (!res.ok) throw new Error("Backend connection failed");
                 const data = await res.json();
                 authToken = data.access_token;
-                localStorage.setItem("token", authToken);
+                
+                // टोकन मिलने के बाद सीधा डैशबोर्ड चालू करें
                 initDashboard();
-                showToast("Logged in successfully");
+                showToast("System Connected!");
             } catch (err) {
-                showToast(err.message, "error");
+                showToast("Error connecting to backend API", "error");
             }
-        });
-
-        function logout() {
-            localStorage.removeItem("token");
-            location.reload();
         }
 
         async function initDashboard() {
@@ -841,8 +748,6 @@
                 if (!res.ok) throw new Error("Session expired");
                 const doctor = await res.json();
 
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("app-screen").style.display = "block";
                 document.getElementById("sidebar-clinic-name").innerText = doctor.clinic_name;
                 document.getElementById("doctor-name").innerText = doctor.name;
                 document.getElementById("doctor-initial").innerText = doctor.name.charAt(0).toUpperCase();
@@ -850,7 +755,7 @@
                 loadTodaySummary();
                 setInterval(loadTodaySummary, 15000); 
             } catch (err) {
-                logout();
+                console.error(err);
             }
         }
 
@@ -1219,7 +1124,13 @@
             } catch (err) { showToast("Error loading tokens", "error"); }
         }
 
-        if (authToken) initDashboard();
+        // =========================================================
+        // STARTUP LOGIC (बिना लॉगिन स्क्रीन के सीधे डैशबोर्ड पर जाए)
+        // =========================================================
+        // जैसे ही पेज लोड होगा, ये अपने आप बैकएंड से कनेक्ट होकर लॉगिन कर लेगा
+        window.addEventListener('DOMContentLoaded', (event) => {
+            autoLogin();
+        });
     </script>
 </body>
 </html>
